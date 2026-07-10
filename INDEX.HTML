@@ -1,0 +1,1697 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Internet of Things – Jaspreet Kaur</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                        geist: ['Geist', 'sans-serif'],
+                    },
+                    colors: {
+                        accent: '#c6f91f',
+                        dark: {
+                            900: '#05080A',
+                            800: '#0B0F13',
+                            700: '#0E1216',
+                            600: '#080B0E',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #05080A; color: #fff; overflow-x: hidden; }
+        ::selection { background: rgba(198,249,31,0.3); color: #c6f91f; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #05080A; }
+        ::-webkit-scrollbar-thumb { background: rgba(198,249,31,0.3); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(198,249,31,0.5); }
+
+        /* Animations */
+        @keyframes float { 0%,100% { transform: translateY(0px); } 50% { transform: translateY(-20px); } }
+        @keyframes pulse-glow { 0%,100% { box-shadow: 0 0 20px rgba(198,249,31,0.1); } 50% { box-shadow: 0 0 40px rgba(198,249,31,0.3); } }
+        @keyframes rotate-slow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes dash { to { stroke-dashoffset: 0; } }
+        @keyframes fade-in-up { from { opacity:0; transform:translateY(40px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes fade-in-left { from { opacity:0; transform:translateX(-40px); } to { opacity:1; transform:translateX(0); } }
+        @keyframes fade-in-right { from { opacity:0; transform:translateX(40px); } to { opacity:1; transform:translateX(0); } }
+        @keyframes scale-in { from { opacity:0; transform:scale(0.8); } to { opacity:1; transform:scale(1); } }
+        @keyframes blink { 0%,100% { opacity:1; } 50% { opacity:0; } }
+        @keyframes wave { 0% { transform: rotate(0deg); } 10% { transform: rotate(14deg); } 20% { transform: rotate(-8deg); } 30% { transform: rotate(14deg); } 40% { transform: rotate(-4deg); } 50% { transform: rotate(10deg); } 60% { transform: rotate(0deg); } 100% { transform: rotate(0deg); } }
+        @keyframes data-flow { 0% { transform: translateX(-100%); opacity:0; } 50% { opacity:1; } 100% { transform: translateX(100%); opacity:0; } }
+        @keyframes node-pulse { 0%,100% { r: 4; opacity: 0.6; } 50% { r: 7; opacity: 1; } }
+        @keyframes line-flow { 0% { stroke-dashoffset: 200; } 100% { stroke-dashoffset: 0; } }
+        @keyframes counter { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes gradient-shift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        @keyframes orbit { from { transform: rotate(0deg) translateX(120px) rotate(0deg); } to { transform: rotate(360deg) translateX(120px) rotate(-360deg); } }
+        @keyframes orbit-reverse { from { transform: rotate(0deg) translateX(180px) rotate(0deg); } to { transform: rotate(-360deg) translateX(180px) rotate(360deg); } }
+
+        .animate-float { animation: float 6s ease-in-out infinite; }
+        .animate-pulse-glow { animation: pulse-glow 3s ease-in-out infinite; }
+        .animate-rotate-slow { animation: rotate-slow 20s linear infinite; }
+        .animate-wave { animation: wave 2.5s infinite; transform-origin: 70% 70%; }
+
+        .reveal { opacity: 0; transform: translateY(40px); transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+        .reveal-left { opacity: 0; transform: translateX(-40px); transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
+        .reveal-left.active { opacity: 1; transform: translateX(0); }
+        .reveal-right { opacity: 0; transform: translateX(40px); transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
+        .reveal-right.active { opacity: 1; transform: translateX(0); }
+        .reveal-scale { opacity: 0; transform: scale(0.8); transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
+        .reveal-scale.active { opacity: 1; transform: scale(1); }
+
+        .stagger-1 { transition-delay: 0.1s; }
+        .stagger-2 { transition-delay: 0.2s; }
+        .stagger-3 { transition-delay: 0.3s; }
+        .stagger-4 { transition-delay: 0.4s; }
+        .stagger-5 { transition-delay: 0.5s; }
+        .stagger-6 { transition-delay: 0.6s; }
+
+        /* Glass card */
+        .glass-card {
+            background: rgba(11,15,19,0.6);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(255,255,255,0.08);
+            transition: all 0.4s cubic-bezier(0.25,0.46,0.45,0.94);
+        }
+        .glass-card:hover {
+            background: rgba(14,18,22,0.8);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5);
+            border-color: rgba(198,249,31,0.15);
+        }
+
+        /* IoT Network SVG */
+        .iot-node { animation: node-pulse 3s ease-in-out infinite; }
+        .iot-line { stroke-dasharray: 200; animation: line-flow 4s linear infinite; }
+
+        /* Gradient text */
+        .gradient-text {
+            background: linear-gradient(135deg, #ffffff 0%, #c6f91f 50%, #ffffff 100%);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradient-shift 4s ease infinite;
+        }
+
+        /* Nav active */
+        .nav-link { position: relative; }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #c6f91f;
+            transition: width 0.3s ease;
+        }
+        .nav-link:hover::after,
+        .nav-link.active::after { width: 100%; }
+
+        /* Progress bar */
+        .progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: #c6f91f; z-index: 9999; transition: width 0.1s linear; }
+
+        /* Tooltip */
+        .tooltip-custom { position: relative; }
+        .tooltip-custom::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 120%;
+            left: 50%;
+            transform: translateX(-50%) translateY(10px);
+            background: #0B0F13;
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+        .tooltip-custom:hover::after { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        /* Mobile menu */
+        .mobile-menu {
+            transform: translateX(100%);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .mobile-menu.open { transform: translateX(0); }
+
+        /* Component connector */
+        .connector-line {
+            position: relative;
+        }
+        .connector-line::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            right: -24px;
+            width: 24px;
+            height: 2px;
+            background: linear-gradient(to right, rgba(198,249,31,0.5), rgba(198,249,31,0));
+        }
+        .connector-line:last-child::after { display: none; }
+
+        /* Working flow arrow */
+        .flow-arrow {
+            position: relative;
+        }
+        .flow-arrow::after {
+            content: '→';
+            position: absolute;
+            right: -30px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #c6f91f;
+            font-size: 24px;
+            font-weight: 300;
+        }
+        .flow-arrow:last-child::after { display: none; }
+
+        /* Particle canvas */
+        #particles-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Section divider */
+        .section-divider {
+            height: 1px;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.1), transparent);
+        }
+
+        /* Cursor glow */
+        .cursor-glow {
+            position: fixed;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(198,249,31,0.04) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 1;
+            transform: translate(-50%, -50%);
+            transition: opacity 0.3s;
+        }
+
+        /* Number counter */
+        .stat-number {
+            font-variant-numeric: tabular-nums;
+        }
+
+        @media (max-width: 768px) {
+            .flow-arrow::after { display: none; }
+            .connector-line::after { display: none; }
+        }
+    </style>
+</head>
+<body class="font-inter antialiased">
+
+    <!-- Progress Bar -->
+    <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+
+    <!-- Cursor Glow -->
+    <div class="cursor-glow hidden md:block" id="cursorGlow"></div>
+
+    <!-- Particles Canvas -->
+    <canvas id="particles-canvas"></canvas>
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-black/70 backdrop-blur-xl border-b border-white/5" id="navbar">
+        <div class="max-w-7xl mx-auto px-6 h-16 sm:h-20 flex items-center justify-between">
+            <!-- Logo -->
+            <a href="#hero" class="flex items-center gap-3 group">
+                <div class="w-9 h-9 rounded-lg bg-accent/10 border border-accent/20 flex items-center justify-center group-hover:bg-accent/20 transition-colors">
+                    <i data-lucide="wifi" class="w-5 h-5 text-accent"></i>
+                </div>
+                <span class="font-geist font-semibold text-white text-sm tracking-tight">IoT Portfolio</span>
+            </a>
+
+            <!-- Desktop Nav -->
+            <div class="hidden lg:flex items-center gap-8">
+                <a href="#thinking" class="nav-link text-xs font-medium uppercase tracking-wider text-white/60 hover:text-white transition-colors">IoT Thinking</a>
+                <a href="#what" class="nav-link text-xs font-medium uppercase tracking-wider text-white/60 hover:text-white transition-colors">What is IoT</a>
+                <a href="#components" class="nav-link text-xs font-medium uppercase tracking-wider text-white/60 hover:text-white transition-colors">Components</a>
+                <a href="#working" class="nav-link text-xs font-medium uppercase tracking-wider text-white/60 hover:text-white transition-colors">Working</a>
+                <a href="#applications" class="nav-link text-xs font-medium uppercase tracking-wider text-white/60 hover:text-white transition-colors">Applications</a>
+                <a href="#advantages" class="nav-link text-xs font-medium uppercase tracking-wider text-white/60 hover:text-white transition-colors">Pros & Cons</a>
+                <a href="#future" class="nav-link text-xs font-medium uppercase tracking-wider text-white/60 hover:text-white transition-colors">Future</a>
+                <a href="#conclusion" class="nav-link text-xs font-medium uppercase tracking-wider text-white/60 hover:text-white transition-colors">Conclusion</a>
+            </div>
+
+            <!-- Mobile Menu Button -->
+            <button id="menuBtn" class="lg:hidden w-10 h-10 flex items-center justify-center rounded-lg border border-white/10 hover:border-accent/30 transition-colors">
+                <i data-lucide="menu" class="w-5 h-5 text-white" id="menuIcon"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu fixed top-0 right-0 w-72 h-full bg-dark-800/95 backdrop-blur-xl z-50 border-l border-white/5 p-6 pt-20" id="mobileMenu">
+        <button id="closeMenuBtn" class="absolute top-5 right-5 w-10 h-10 flex items-center justify-center rounded-lg border border-white/10 hover:border-accent/30 transition-colors">
+            <i data-lucide="x" class="w-5 h-5 text-white"></i>
+        </button>
+        <div class="flex flex-col gap-4">
+            <a href="#thinking" class="mobile-nav-link text-sm font-medium text-white/70 hover:text-accent transition-colors py-2 border-b border-white/5">Internet of Thinking</a>
+            <a href="#what" class="mobile-nav-link text-sm font-medium text-white/70 hover:text-accent transition-colors py-2 border-b border-white/5">What is IoT</a>
+            <a href="#components" class="mobile-nav-link text-sm font-medium text-white/70 hover:text-accent transition-colors py-2 border-b border-white/5">Components</a>
+            <a href="#working" class="mobile-nav-link text-sm font-medium text-white/70 hover:text-accent transition-colors py-2 border-b border-white/5">Working</a>
+            <a href="#applications" class="mobile-nav-link text-sm font-medium text-white/70 hover:text-accent transition-colors py-2 border-b border-white/5">Applications</a>
+            <a href="#advantages" class="mobile-nav-link text-sm font-medium text-white/70 hover:text-accent transition-colors py-2 border-b border-white/5">Advantages</a>
+            <a href="#disadvantages" class="mobile-nav-link text-sm font-medium text-white/70 hover:text-accent transition-colors py-2 border-b border-white/5">Disadvantages</a>
+            <a href="#future" class="mobile-nav-link text-sm font-medium text-white/70 hover:text-accent transition-colors py-2 border-b border-white/5">Future Scope</a>
+            <a href="#conclusion" class="mobile-nav-link text-sm font-medium text-white/70 hover:text-accent transition-colors py-2">Conclusion</a>
+        </div>
+    </div>
+    <div class="fixed inset-0 bg-black/50 z-40 hidden" id="menuOverlay"></div>
+
+    <!-- ===== SECTION 1: HERO / TITLE ===== -->
+    <section id="hero" class="relative min-h-screen flex items-center justify-center overflow-hidden">
+        <!-- Background Effects -->
+        <div class="absolute inset-0 z-0">
+            <div class="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-accent/[0.03] rounded-full blur-[120px]"></div>
+            <div class="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-accent/[0.02] rounded-full blur-[100px]"></div>
+        </div>
+
+        <!-- IoT Network Animation -->
+        <div class="absolute inset-0 z-0 flex items-center justify-center opacity-20">
+            <svg width="800" height="800" viewBox="0 0 800 800" class="animate-rotate-slow">
+                <circle cx="400" cy="400" r="150" fill="none" stroke="rgba(198,249,31,0.1)" stroke-width="1" stroke-dasharray="10 5"/>
+                <circle cx="400" cy="400" r="280" fill="none" stroke="rgba(198,249,31,0.07)" stroke-width="1" stroke-dasharray="15 8"/>
+                <circle cx="400" cy="400" r="380" fill="none" stroke="rgba(198,249,31,0.04)" stroke-width="1" stroke-dasharray="20 10"/>
+                <!-- Nodes -->
+                <circle cx="400" cy="250" r="4" fill="#c6f91f" class="iot-node"/>
+                <circle cx="550" cy="400" r="4" fill="#c6f91f" class="iot-node" style="animation-delay: 0.5s"/>
+                <circle cx="400" cy="550" r="4" fill="#c6f91f" class="iot-node" style="animation-delay: 1s"/>
+                <circle cx="250" cy="400" r="4" fill="#c6f91f" class="iot-node" style="animation-delay: 1.5s"/>
+                <circle cx="520" cy="280" r="3" fill="#c6f91f" class="iot-node" style="animation-delay: 0.3s"/>
+                <circle cx="520" cy="520" r="3" fill="#c6f91f" class="iot-node" style="animation-delay: 0.8s"/>
+                <circle cx="280" cy="520" r="3" fill="#c6f91f" class="iot-node" style="animation-delay: 1.3s"/>
+                <circle cx="280" cy="280" r="3" fill="#c6f91f" class="iot-node" style="animation-delay: 1.8s"/>
+                <!-- Lines -->
+                <line x1="400" y1="250" x2="550" y2="400" stroke="rgba(198,249,31,0.15)" stroke-width="1" class="iot-line"/>
+                <line x1="550" y1="400" x2="400" y2="550" stroke="rgba(198,249,31,0.15)" stroke-width="1" class="iot-line" style="animation-delay: 1s"/>
+                <line x1="400" y1="550" x2="250" y2="400" stroke="rgba(198,249,31,0.15)" stroke-width="1" class="iot-line" style="animation-delay: 2s"/>
+                <line x1="250" y1="400" x2="400" y2="250" stroke="rgba(198,249,31,0.15)" stroke-width="1" class="iot-line" style="animation-delay: 3s"/>
+            </svg>
+        </div>
+
+        <div class="relative z-10 text-center px-6 max-w-5xl mx-auto">
+            <!-- Badge -->
+            <div style="animation: fade-in-up 0.8s ease forwards;" class="mb-8">
+                <span class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-xs font-medium uppercase tracking-widest text-white/70">
+                    <span class="w-2 h-2 rounded-full bg-accent animate-pulse"></span>
+                    IoT Project Presentation
+                </span>
+            </div>
+
+            <!-- Main Title -->
+            <h1 style="animation: fade-in-up 0.8s ease 0.2s both;" class="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-light tracking-tighter leading-[1.05] mb-6">
+                Internet of<br>
+                <span class="gradient-text font-normal">Things</span>
+            </h1>
+
+            <!-- Subtitle Definition -->
+            <p style="animation: fade-in-up 0.8s ease 0.4s both;" class="text-lg sm:text-xl text-white/60 font-light max-w-3xl mx-auto mb-10 leading-relaxed">
+                The Internet of Things (IoT) is a technology that connects physical devices to the internet so they can
+                <span class="text-accent/90">collect</span>,
+                <span class="text-accent/90">share</span>, and
+                <span class="text-accent/90">exchange data</span>
+                automatically.
+            </p>
+
+            <!-- Author Info -->
+            <div style="animation: fade-in-up 0.8s ease 0.6s both;" class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
+                <div class="flex items-center gap-3 px-5 py-3 rounded-xl bg-white/5 border border-white/10">
+                    <div class="w-10 h-10 rounded-full bg-accent/10 border border-accent/20 flex items-center justify-center">
+                        <i data-lucide="user" class="w-5 h-5 text-accent"></i>
+                    </div>
+                    <div class="text-left">
+                        <p class="text-sm font-medium text-white">Jaspreet Kaur</p>
+                        <p class="text-xs text-white/40">IoT Research & Presentation</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CTA Buttons -->
+            <div style="animation: fade-in-up 0.8s ease 0.8s both;" class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <a href="#thinking" class="group inline-flex items-center gap-2 px-8 py-4 bg-white text-black text-xs font-medium uppercase tracking-wider rounded-lg hover:bg-slate-200 transition-colors">
+                    Explore IoT
+                    <i data-lucide="arrow-down" class="w-4 h-4 group-hover:translate-y-0.5 transition-transform"></i>
+                </a>
+                <a href="#applications" class="inline-flex items-center gap-2 px-8 py-4 border border-white/10 text-white text-xs font-medium uppercase tracking-wider rounded-lg hover:border-accent/30 hover:bg-white/5 transition-all">
+                    View Applications
+                </a>
+            </div>
+        </div>
+
+        <!-- Scroll Indicator -->
+        <div class="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2" style="animation: fade-in-up 1s ease 1.2s both;">
+            <span class="text-[10px] uppercase tracking-widest text-white/30">Scroll</span>
+            <div class="w-5 h-8 rounded-full border border-white/20 flex items-start justify-center p-1">
+                <div class="w-1 h-2 rounded-full bg-accent animate-bounce"></div>
+            </div>
+        </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- ===== SECTION 2: INTERNET OF THINKING ===== -->
+    <section id="thinking" class="relative py-24 sm:py-32 overflow-hidden">
+        <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-accent/[0.02] rounded-full blur-[120px]"></div>
+        <div class="max-w-7xl mx-auto px-6 relative z-10">
+            <div class="grid lg:grid-cols-2 gap-16 items-center">
+                <!-- Left Content -->
+                <div class="reveal-left">
+                    <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/10 border border-accent/20 text-[10px] font-semibold uppercase tracking-widest text-accent mb-6">
+                        <i data-lucide="brain" class="w-3 h-3"></i>
+                        Concept
+                    </span>
+                    <h2 class="text-4xl sm:text-5xl lg:text-6xl font-light tracking-tighter leading-[1.1] mb-6">
+                        Internet of<br><span class="text-accent">Thinking</span>
+                    </h2>
+                    <p class="text-lg text-white/60 font-light leading-relaxed mb-6">
+                        While IoT connects <em class="text-white/80 not-italic">devices</em>, the Internet of Thinking (IoTk) represents the next evolution — connecting <em class="text-accent/90 not-italic">human thought processes</em> with intelligent systems.
+                    </p>
+                    <p class="text-base text-white/50 font-light leading-relaxed mb-8">
+                        IoTk combines IoT data with AI, machine learning, and cognitive computing to create systems that don't just collect data — they <strong class="text-white/80 font-medium">understand, reason, and make decisions</strong> autonomously, augmenting human intelligence.
+                    </p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="flex items-start gap-3 p-4 rounded-xl bg-white/[0.03] border border-white/5">
+                            <div class="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <i data-lucide="cpu" class="w-4 h-4 text-accent"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-white/90">Cognitive Computing</p>
+                                <p class="text-xs text-white/40 mt-1">Mimics human thought patterns</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3 p-4 rounded-xl bg-white/[0.03] border border-white/5">
+                            <div class="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <i data-lucide="sparkles" class="w-4 h-4 text-accent"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-white/90">AI Integration</p>
+                                <p class="text-xs text-white/40 mt-1">Self-learning systems</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3 p-4 rounded-xl bg-white/[0.03] border border-white/5">
+                            <div class="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <i data-lucide="zap" class="w-4 h-4 text-accent"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-white/90">Real-time Reasoning</p>
+                                <p class="text-xs text-white/40 mt-1">Instant decision making</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3 p-4 rounded-xl bg-white/[0.03] border border-white/5">
+                            <div class="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <i data-lucide="network" class="w-4 h-4 text-accent"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-white/90">Connected Intelligence</p>
+                                <p class="text-xs text-white/40 mt-1">Devices that understand context</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Visual -->
+                <div class="reveal-right relative">
+                    <div class="relative">
+                        <!-- Brain/IoT visual -->
+                        <div class="w-full aspect-square max-w-lg mx-auto relative">
+                            <!-- Outer ring -->
+                            <div class="absolute inset-0 rounded-full border border-white/5 animate-rotate-slow"></div>
+                            <div class="absolute inset-6 rounded-full border border-accent/10 animate-rotate-slow" style="animation-direction: reverse; animation-duration: 25s;"></div>
+                            <div class="absolute inset-12 rounded-full border border-white/5 animate-rotate-slow" style="animation-duration: 30s;"></div>
+
+                            <!-- Center brain icon -->
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <div class="w-28 h-28 rounded-3xl bg-accent/10 border border-accent/20 flex items-center justify-center animate-pulse-glow">
+                                    <i data-lucide="brain" class="w-14 h-14 text-accent"></i>
+                                </div>
+                            </div>
+
+                            <!-- Orbiting icons -->
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <div style="animation: orbit 15s linear infinite;">
+                                    <div class="w-12 h-12 rounded-xl bg-dark-800 border border-white/10 flex items-center justify-center shadow-lg">
+                                        <i data-lucide="thermometer" class="w-5 h-5 text-accent/70"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <div style="animation: orbit 15s linear infinite; animation-delay: -3.75s;">
+                                    <div class="w-12 h-12 rounded-xl bg-dark-800 border border-white/10 flex items-center justify-center shadow-lg">
+                                        <i data-lucide="heart-pulse" class="w-5 h-5 text-accent/70"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <div style="animation: orbit 15s linear infinite; animation-delay: -7.5s;">
+                                    <div class="w-12 h-12 rounded-xl bg-dark-800 border border-white/10 flex items-center justify-center shadow-lg">
+                                        <i data-lucide="car" class="w-5 h-5 text-accent/70"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <div style="animation: orbit 15s linear infinite; animation-delay: -11.25s;">
+                                    <div class="w-12 h-12 rounded-xl bg-dark-800 border border-white/10 flex items-center justify-center shadow-lg">
+                                        <i data-lucide="home" class="w-5 h-5 text-accent/70"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <div style="animation: orbit-reverse 20s linear infinite;">
+                                    <div class="w-10 h-10 rounded-lg bg-dark-800 border border-white/10 flex items-center justify-center shadow-lg">
+                                        <i data-lucide="cloud" class="w-4 h-4 text-white/40"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- IoT → IoTk Evolution -->
+            <div class="mt-20 reveal">
+                <div class="glass-card rounded-2xl p-8 sm:p-10">
+                    <div class="flex flex-col md:flex-row items-center gap-6 md:gap-10">
+                        <div class="flex-1 text-center md:text-left">
+                            <p class="text-xs uppercase tracking-widest text-white/40 mb-2">Evolution</p>
+                            <p class="text-2xl sm:text-3xl font-light text-white/90 tracking-tight">IoT <span class="text-white/40 mx-2">→</span> IoTk</p>
+                            <p class="text-sm text-white/50 mt-2">From connected devices to connected intelligence</p>
+                        </div>
+                        <div class="hidden md:block w-px h-16 bg-gradient-to-b from-transparent via-accent/30 to-transparent"></div>
+                        <div class="flex-1 grid grid-cols-3 gap-4 text-center">
+                            <div>
+                                <p class="text-2xl font-light text-accent stat-number">Sense</p>
+                                <p class="text-[10px] uppercase tracking-wider text-white/40 mt-1">Collect Data</p>
+                            </div>
+                            <div>
+                                <p class="text-2xl font-light text-accent stat-number">Think</p>
+                                <p class="text-[10px] uppercase tracking-wider text-white/40 mt-1">Analyze & Reason</p>
+                            </div>
+                            <div>
+                                <p class="text-2xl font-light text-accent stat-number">Act</p>
+                                <p class="text-[10px] uppercase tracking-wider text-white/40 mt-1">Decide & Execute</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- ===== SECTION 3: WHAT IS IOT ===== -->
+    <section id="what" class="relative py-24 sm:py-32 overflow-hidden">
+        <div class="absolute bottom-0 left-0 w-[500px] h-[500px] bg-accent/[0.02] rounded-full blur-[120px]"></div>
+        <div class="max-w-7xl mx-auto px-6 relative z-10">
+            <div class="text-center mb-16 reveal">
+                <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/10 border border-accent/20 text-[10px] font-semibold uppercase tracking-widest text-accent mb-6">
+                    <i data-lucide="info" class="w-3 h-3"></i>
+                    Definition
+                </span>
+                <h2 class="text-4xl sm:text-5xl lg:text-6xl font-light tracking-tighter leading-[1.1] mb-6">
+                    What is <span class="text-accent">IoT</span>?
+                </h2>
+                <p class="text-lg text-white/50 font-light max-w-3xl mx-auto">
+                    Understanding the foundation of connected technology
+                </p>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                <!-- Definition Card -->
+                <div class="reveal-left">
+                    <div class="glass-card rounded-2xl p-8 sm:p-10 relative overflow-hidden">
+                        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-accent via-accent/50 to-transparent"></div>
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
+                                <i data-lucide="quote" class="w-5 h-5 text-accent"></i>
+                            </div>
+                            <span class="text-xs uppercase tracking-widest text-white/40">Formal Definition</span>
+                        </div>
+                        <p class="text-xl sm:text-2xl font-light text-white/90 leading-relaxed mb-6">
+                            IoT is a network of <span class="text-accent">smart devices</span> such as sensors, mobile phones, cameras, and home appliances that <span class="text-accent">communicate with each other</span> through the internet.
+                        </p>
+                        <div class="flex items-center gap-4 pt-4 border-t border-white/5">
+                            <div class="flex -space-x-2">
+                                <div class="w-8 h-8 rounded-full bg-accent/20 border-2 border-dark-800 flex items-center justify-center">
+                                    <i data-lucide="smartphone" class="w-3.5 h-3.5 text-accent"></i>
+                                </div>
+                                <div class="w-8 h-8 rounded-full bg-blue-500/20 border-2 border-dark-800 flex items-center justify-center">
+                                    <i data-lucide="camera" class="w-3.5 h-3.5 text-blue-400"></i>
+                                </div>
+                                <div class="w-8 h-8 rounded-full bg-purple-500/20 border-2 border-dark-800 flex items-center justify-center">
+                                    <i data-lucide="thermometer" class="w-3.5 h-3.5 text-purple-400"></i>
+                                </div>
+                                <div class="w-8 h-8 rounded-full bg-orange-500/20 border-2 border-dark-800 flex items-center justify-center">
+                                    <i data-lucide="lamp" class="w-3.5 h-3.5 text-orange-400"></i>
+                                </div>
+                            </div>
+                            <p class="text-xs text-white/40">Sensors • Phones • Cameras • Appliances</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Key Points -->
+                <div class="reveal-right space-y-4">
+                    <div class="glass-card rounded-xl p-6 flex items-start gap-4 group">
+                        <div class="w-12 h-12 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                            <i data-lucide="link" class="w-5 h-5 text-accent"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-base font-medium text-white mb-1">Connectivity</h4>
+                            <p class="text-sm text-white/50 leading-relaxed">Devices are connected to the internet or to each other through various communication protocols.</p>
+                        </div>
+                    </div>
+                    <div class="glass-card rounded-xl p-6 flex items-start gap-4 group">
+                        <div class="w-12 h-12 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                            <i data-lucide="database" class="w-5 h-5 text-accent"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-base font-medium text-white mb-1">Data Collection</h4>
+                            <p class="text-sm text-white/50 leading-relaxed">Sensors and devices continuously gather data from their environment and interactions.</p>
+                        </div>
+                    </div>
+                    <div class="glass-card rounded-xl p-6 flex items-start gap-4 group">
+                        <div class="w-12 h-12 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                            <i data-lucide="repeat" class="w-5 h-5 text-accent"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-base font-medium text-white mb-1">Data Exchange</h4>
+                            <p class="text-sm text-white/50 leading-relaxed">Collected data is shared between devices, cloud platforms, and user interfaces in real-time.</p>
+                        </div>
+                    </div>
+                    <div class="glass-card rounded-xl p-6 flex items-start gap-4 group">
+                        <div class="w-12 h-12 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                            <i data-lucide="bot" class="w-5 h-5 text-accent"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-base font-medium text-white mb-1">Automation</h4>
+                            <p class="text-sm text-white/50 leading-relaxed">Devices can take automatic actions based on the analyzed data without human intervention.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-16">
+                <div class="reveal stagger-1 glass-card rounded-xl p-6 text-center">
+                    <p class="text-3xl sm:text-4xl font-light text-accent stat-number" data-count="75">0</p>
+                    <p class="text-[10px] uppercase tracking-widest text-white/40 mt-2">Billion IoT Devices (2025)</p>
+                </div>
+                <div class="reveal stagger-2 glass-card rounded-xl p-6 text-center">
+                    <p class="text-3xl sm:text-4xl font-light text-accent stat-number" data-count="1100">0</p>
+                    <p class="text-[10px] uppercase tracking-widest text-white/40 mt-2">Billion USD Market</p>
+                </div>
+                <div class="reveal stagger-3 glass-card rounded-xl p-6 text-center">
+                    <p class="text-3xl sm:text-4xl font-light text-accent stat-number" data-count="30">0</p>
+                    <p class="text-[10px] uppercase tracking-widest text-white/40 mt-2">Billion Connected by 2030</p>
+                </div>
+                <div class="reveal stagger-4 glass-card rounded-xl p-6 text-center">
+                    <p class="text-3xl sm:text-4xl font-light text-accent stat-number" data-count="94">0</p>
+                    <p class="text-[10px] uppercase tracking-widest text-white/40 mt-2">% Enterprises Using IoT</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- ===== SECTION 4: COMPONENTS OF IOT ===== -->
+    <section id="components" class="relative py-24 sm:py-32 overflow-hidden">
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-accent/[0.02] rounded-full blur-[120px]"></div>
+        <div class="max-w-7xl mx-auto px-6 relative z-10">
+            <div class="text-center mb-16 reveal">
+                <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/10 border border-accent/20 text-[10px] font-semibold uppercase tracking-widest text-accent mb-6">
+                    <i data-lucide="blocks" class="w-3 h-3"></i>
+                    Architecture
+                </span>
+                <h2 class="text-4xl sm:text-5xl lg:text-6xl font-light tracking-tighter leading-[1.1] mb-6">
+                    Components of <span class="text-accent">IoT</span>
+                </h2>
+                <p class="text-lg text-white/50 font-light max-w-2xl mx-auto">
+                    The four essential building blocks that make any IoT system work
+                </p>
+            </div>
+
+            <!-- Components Grid -->
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Sensors -->
+                <div class="reveal stagger-1 group">
+                    <div class="glass-card rounded-2xl p-8 h-full relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-accent/[0.03] rounded-full blur-[40px] group-hover:bg-accent/[0.06] transition-colors"></div>
+                        <div class="relative z-10">
+                            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-accent/20 to-accent/5 border border-accent/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                                <i data-lucide="radar" class="w-7 h-7 text-accent"></i>
+                            </div>
+                            <div class="text-[10px] font-bold uppercase tracking-widest text-accent/60 mb-2">01</div>
+                            <h3 class="text-xl font-medium text-white mb-3">Sensors</h3>
+                            <p class="text-sm text-white/50 leading-relaxed mb-4">
+                                Collect data from the physical environment — temperature, motion, humidity, light, and more.
+                            </p>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="px-2 py-1 rounded-md bg-white/5 text-[10px] text-white/40">Temperature</span>
+                                <span class="px-2 py-1 rounded-md bg-white/5 text-[10px] text-white/40">Motion</span>
+                                <span class="px-2 py-1 rounded-md bg-white/5 text-[10px] text-white/40">GPS</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Connectivity -->
+                <div class="reveal stagger-2 group">
+                    <div class="glass-card rounded-2xl p-8 h-full relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-blue-500/[0.03] rounded-full blur-[40px] group-hover:bg-blue-500/[0.06] transition-colors"></div>
+                        <div class="relative z-10">
+                            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500/20 to-blue-500/5 border border-blue-500/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                                <i data-lucide="radio-tower" class="w-7 h-7 text-blue-400"></i>
+                            </div>
+                            <div class="text-[10px] font-bold uppercase tracking-widest text-blue-400/60 mb-2">02</div>
+                            <h3 class="text-xl font-medium text-white mb-3">Connectivity</h3>
+                            <p class="text-sm text-white/50 leading-relaxed mb-4">
+                                Sends collected data through the internet using various communication protocols and networks.
+                            </p>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="px-2 py-1 rounded-md bg-white/5 text-[10px] text-white/40">WiFi</span>
+                                <span class="px-2 py-1 rounded-md bg-white/5 text-[10px] text-white/40">Bluetooth</span>
+                                <span class="px-2 py-1 rounded-md bg-white/5 text-[10px] text-white/40">5G</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cloud -->
+                <div class="reveal stagger-3 group">
+                    <div class="glass-card rounded-2xl p-8 h-full relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-purple-500/[0.03] rounded-full blur-[40px] group-hover:bg-purple-500/[0.06] transition-colors"></div>
+                        <div class="relative z-10">
+                            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500/20 to-purple-500/5 border border-purple-500/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                                <i data-lucide="cloud" class="w-7 h-7 text-purple-400"></i>
+                            </div>
+                            <div class="text-[10px] font-bold uppercase tracking-widest text-purple-400/60 mb-2">03</div>
+                            <h3 class="text-xl font-medium text-white mb-3">Cloud</h3>
+                            <p class="text-sm text-white/50 leading-relaxed mb-4">
+                                Stores and processes massive amounts of data using powerful cloud computing platforms.
+                            </p>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="px-2 py-1 rounded-md bg-white/5 text-[10px] text-white/40">AWS</span>
+                                <span class="px-2 py-1 rounded-md bg-white/5 text-[10px] text-white/40">Azure</span>
+                                <span class="px-2 py-1 rounded-md bg-white/5 text-[10px] text-white/40">GCP</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Applications -->
+                <div class="reveal stagger-4 group">
+                    <div class="glass-card rounded-2xl p-8 h-full relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-orange-500/[0.03] rounded-full blur-[40px] group-hover:bg-orange-500/[0.06] transition-colors"></div>
+                        <div class="relative z-10">
+                            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-orange-500/20 to-orange-500/5 border border-orange-500/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                                <i data-lucide="monitor-smartphone" class="w-7 h-7 text-orange-400"></i>
+                            </div>
+                            <div class="text-[10px] font-bold uppercase tracking-widest text-orange-400/60 mb-2">04</div>
+                            <h3 class="text-xl font-medium text-white mb-3">Applications</h3>
+                            <p class="text-sm text-white/50 leading-relaxed mb-4">
+                                Show processed information to users through dashboards, apps, and alert systems.
+                            </p>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="px-2 py-1 rounded-md bg-white/5 text-[10px] text-white/40">Dashboard</span>
+                                <span class="px-2 py-1 rounded-md bg-white/5 text-[10px] text-white/40">Mobile App</span>
+                                <span class="px-2 py-1 rounded-md bg-white/5 text-[10px] text-white/40">Alerts</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Flow Diagram -->
+            <div class="mt-16 reveal">
+                <div class="glass-card rounded-2xl p-8 sm:p-10">
+                    <p class="text-xs uppercase tracking-widest text-white/40 mb-8 text-center">Data Flow Architecture</p>
+                    <div class="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-0">
+                        <div class="flex items-center gap-3 px-6 py-4 rounded-xl bg-accent/5 border border-accent/20">
+                            <i data-lucide="radar" class="w-5 h-5 text-accent"></i>
+                            <span class="text-sm font-medium text-white">Sensors</span>
+                        </div>
+                        <div class="hidden md:block w-12 h-px bg-gradient-to-r from-accent/40 to-blue-400/40"></div>
+                        <div class="md:hidden w-px h-8 bg-gradient-to-b from-accent/40 to-blue-400/40"></div>
+                        <div class="hidden md:flex items-center"><i data-lucide="chevron-right" class="w-4 h-4 text-white/20"></i></div>
+                        <div class="flex items-center gap-3 px-6 py-4 rounded-xl bg-blue-500/5 border border-blue-500/20">
+                            <i data-lucide="radio-tower" class="w-5 h-5 text-blue-400"></i>
+                            <span class="text-sm font-medium text-white">Connectivity</span>
+                        </div>
+                        <div class="hidden md:block w-12 h-px bg-gradient-to-r from-blue-400/40 to-purple-400/40"></div>
+                        <div class="md:hidden w-px h-8 bg-gradient-to-b from-blue-400/40 to-purple-400/40"></div>
+                        <div class="hidden md:flex items-center"><i data-lucide="chevron-right" class="w-4 h-4 text-white/20"></i></div>
+                        <div class="flex items-center gap-3 px-6 py-4 rounded-xl bg-purple-500/5 border border-purple-500/20">
+                            <i data-lucide="cloud" class="w-5 h-5 text-purple-400"></i>
+                            <span class="text-sm font-medium text-white">Cloud</span>
+                        </div>
+                        <div class="hidden md:block w-12 h-px bg-gradient-to-r from-purple-400/40 to-orange-400/40"></div>
+                        <div class="md:hidden w-px h-8 bg-gradient-to-b from-purple-400/40 to-orange-400/40"></div>
+                        <div class="hidden md:flex items-center"><i data-lucide="chevron-right" class="w-4 h-4 text-white/20"></i></div>
+                        <div class="flex items-center gap-3 px-6 py-4 rounded-xl bg-orange-500/5 border border-orange-500/20">
+                            <i data-lucide="monitor-smartphone" class="w-5 h-5 text-orange-400"></i>
+                            <span class="text-sm font-medium text-white">Applications</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- ===== SECTION 5: WORKING OF IOT ===== -->
+    <section id="working" class="relative py-24 sm:py-32 overflow-hidden">
+        <div class="max-w-7xl mx-auto px-6 relative z-10">
+            <div class="text-center mb-16 reveal">
+                <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/10 border border-accent/20 text-[10px] font-semibold uppercase tracking-widest text-accent mb-6">
+                    <i data-lucide="settings" class="w-3 h-3"></i>
+                    Process
+                </span>
+                <h2 class="text-4xl sm:text-5xl lg:text-6xl font-light tracking-tighter leading-[1.1] mb-6">
+                    Working of <span class="text-accent">IoT</span>
+                </h2>
+                <p class="text-lg text-white/50 font-light max-w-2xl mx-auto">
+                    IoT works by collecting data from sensors, sending it to the cloud, analyzing the data, and then taking automatic actions or displaying results to users.
+                </p>
+            </div>
+
+            <!-- Steps -->
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div class="reveal stagger-1 relative">
+                    <div class="text-7xl font-light text-white/[0.03] absolute -top-4 -left-2">1</div>
+                    <div class="relative z-10">
+                        <div class="w-16 h-16 rounded-2xl bg-accent/10 border border-accent/20 flex items-center justify-center mb-6 animate-pulse-glow">
+                            <i data-lucide="scan-line" class="w-7 h-7 text-accent"></i>
+                        </div>
+                        <h3 class="text-lg font-medium text-white mb-3">Sense & Collect</h3>
+                        <p class="text-sm text-white/50 leading-relaxed">
+                            Sensors detect changes in the environment and collect raw data — temperature, motion, humidity, light levels, etc.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="reveal stagger-2 relative">
+                    <div class="text-7xl font-light text-white/[0.03] absolute -top-4 -left-2">2</div>
+                    <div class="relative z-10">
+                        <div class="w-16 h-16 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-6">
+                            <i data-lucide="send" class="w-7 h-7 text-blue-400"></i>
+                        </div>
+                        <h3 class="text-lg font-medium text-white mb-3">Transmit</h3>
+                        <p class="text-sm text-white/50 leading-relaxed">
+                            Collected data is sent to the cloud via WiFi, Bluetooth, cellular networks, or other communication protocols.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="reveal stagger-3 relative">
+                    <div class="text-7xl font-light text-white/[0.03] absolute -top-4 -left-2">3</div>
+                    <div class="relative z-10">
+                        <div class="w-16 h-16 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mb-6">
+                            <i data-lucide="bar-chart-3" class="w-7 h-7 text-purple-400"></i>
+                        </div>
+                        <h3 class="text-lg font-medium text-white mb-3">Process & Analyze</h3>
+                        <p class="text-sm text-white/50 leading-relaxed">
+                            Cloud platforms process the data using analytics and AI algorithms to extract meaningful insights and patterns.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="reveal stagger-4 relative">
+                    <div class="text-7xl font-light text-white/[0.03] absolute -top-4 -left-2">4</div>
+                    <div class="relative z-10">
+                        <div class="w-16 h-16 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center mb-6">
+                            <i data-lucide="arrow-right-left" class="w-7 h-7 text-orange-400"></i>
+                        </div>
+                        <h3 class="text-lg font-medium text-white mb-3">Act & Notify</h3>
+                        <p class="text-sm text-white/50 leading-relaxed">
+                            System takes automatic actions (turn on AC, trigger alarm) or displays results to users via dashboards and alerts.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interactive Example -->
+            <div class="mt-16 reveal">
+                <div class="glass-card rounded-2xl p-8 sm:p-10">
+                    <p class="text-xs uppercase tracking-widest text-white/40 mb-6 text-center">Real-World Example</p>
+                    <div class="grid md:grid-cols-4 gap-6">
+                        <div class="text-center p-4 rounded-xl bg-white/[0.02] border border-white/5">
+                            <div class="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center mx-auto mb-3">
+                                <i data-lucide="thermometer" class="w-5 h-5 text-accent"></i>
+                            </div>
+                            <p class="text-xs text-white/70 font-medium">Room temp rises to 35°C</p>
+                            <p class="text-[10px] text-white/30 mt-1">Sensor detects</p>
+                        </div>
+                        <div class="text-center p-4 rounded-xl bg-white/[0.02] border border-white/5">
+                            <div class="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center mx-auto mb-3">
+                                <i data-lucide="wifi" class="w-5 h-5 text-blue-400"></i>
+                            </div>
+                            <p class="text-xs text-white/70 font-medium">Data sent via WiFi</p>
+                            <p class="text-[10px] text-white/30 mt-1">To cloud server</p>
+                        </div>
+                        <div class="text-center p-4 rounded-xl bg-white/[0.02] border border-white/5">
+                            <div class="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center mx-auto mb-3">
+                                <i data-lucide="brain" class="w-5 h-5 text-purple-400"></i>
+                            </div>
+                            <p class="text-xs text-white/70 font-medium">AI analyzes threshold</p>
+                            <p class="text-[10px] text-white/30 mt-1">Exceeds 30°C limit</p>
+                        </div>
+                        <div class="text-center p-4 rounded-xl bg-white/[0.02] border border-white/5">
+                            <div class="w-12 h-12 rounded-xl bg-orange-500/10 flex items-center justify-center mx-auto mb-3">
+                                <i data-lucide="snowflake" class="w-5 h-5 text-orange-400"></i>
+                            </div>
+                            <p class="text-xs text-white/70 font-medium">AC turns on automatically</p>
+                            <p class="text-[10px] text-white/30 mt-1">Alert sent to user</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- ===== SECTION 6: APPLICATIONS OF IOT ===== -->
+    <section id="applications" class="relative py-24 sm:py-32 overflow-hidden">
+        <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-accent/[0.02] rounded-full blur-[120px]"></div>
+        <div class="max-w-7xl mx-auto px-6 relative z-10">
+            <div class="text-center mb-16 reveal">
+                <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/10 border border-accent/20 text-[10px] font-semibold uppercase tracking-widest text-accent mb-6">
+                    <i data-lucide="layout-grid" class="w-3 h-3"></i>
+                    Use Cases
+                </span>
+                <h2 class="text-4xl sm:text-5xl lg:text-6xl font-light tracking-tighter leading-[1.1] mb-6">
+                    Applications of <span class="text-accent">IoT</span>
+                </h2>
+                <p class="text-lg text-white/50 font-light max-w-2xl mx-auto">
+                    IoT is used in many fields to improve efficiency and convenience
+                </p>
+            </div>
+
+            <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Smart Homes -->
+                <div class="reveal stagger-1 group">
+                    <div class="glass-card rounded-2xl overflow-hidden h-full">
+                        <div class="h-44 relative overflow-hidden">
+                            <img src="https://picsum.photos/seed/smarthome-iot/600/350.jpg" alt="Smart Home" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+                            <div class="absolute inset-0 bg-gradient-to-t from-dark-900 via-dark-900/50 to-transparent"></div>
+                            <div class="absolute bottom-4 left-4">
+                                <div class="w-10 h-10 rounded-xl bg-accent/20 backdrop-blur-sm border border-accent/30 flex items-center justify-center">
+                                    <i data-lucide="home" class="w-5 h-5 text-accent"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-lg font-medium text-white mb-2">Smart Homes</h3>
+                            <p class="text-sm text-white/50 leading-relaxed">Automated lighting, security cameras, smart thermostats, voice assistants, and connected appliances.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Healthcare -->
+                <div class="reveal stagger-2 group">
+                    <div class="glass-card rounded-2xl overflow-hidden h-full">
+                        <div class="h-44 relative overflow-hidden">
+                            <img src="https://picsum.photos/seed/healthcare-iot/600/350.jpg" alt="Healthcare" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+                            <div class="absolute inset-0 bg-gradient-to-t from-dark-900 via-dark-900/50 to-transparent"></div>
+                            <div class="absolute bottom-4 left-4">
+                                <div class="w-10 h-10 rounded-xl bg-red-500/20 backdrop-blur-sm border border-red-500/30 flex items-center justify-center">
+                                    <i data-lucide="heart-pulse" class="w-5 h-5 text-red-400"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-lg font-medium text-white mb-2">Healthcare</h3>
+                            <p class="text-sm text-white/50 leading-relaxed">Remote patient monitoring, wearable health trackers, smart pills, and connected medical equipment.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Agriculture -->
+                <div class="reveal stagger-3 group">
+                    <div class="glass-card rounded-2xl overflow-hidden h-full">
+                        <div class="h-44 relative overflow-hidden">
+                            <img src="https://picsum.photos/seed/agriculture-iot/600/350.jpg" alt="Agriculture" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+                            <div class="absolute inset-0 bg-gradient-to-t from-dark-900 via-dark-900/50 to-transparent"></div>
+                            <div class="absolute bottom-4 left-4">
+                                <div class="w-10 h-10 rounded-xl bg-green-500/20 backdrop-blur-sm border border-green-500/30 flex items-center justify-center">
+                                    <i data-lucide="sprout" class="w-5 h-5 text-green-400"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-lg font-medium text-white mb-2">Agriculture</h3>
+                            <p class="text-sm text-white/50 leading-relaxed">Soil monitoring, precision farming, automated irrigation, and crop health analysis using drones.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Industries -->
+                <div class="reveal stagger-4 group">
+                    <div class="glass-card rounded-2xl overflow-hidden h-full">
+                        <div class="h-44 relative overflow-hidden">
+                            <img src="https://picsum.photos/seed/industry-iot/600/350.jpg" alt="Industries" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+                            <div class="absolute inset-0 bg-gradient-to-t from-dark-900 via-dark-900/50 to-transparent"></div>
+                            <div class="absolute bottom-4 left-4">
+                                <div class="w-10 h-10 rounded-xl bg-yellow-500/20 backdrop-blur-sm border border-yellow-500/30 flex items-center justify-center">
+                                    <i data-lucide="factory" class="w-5 h-5 text-yellow-400"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-lg font-medium text-white mb-2">Industries</h3>
+                            <p class="text-sm text-white/50 leading-relaxed">Predictive maintenance, quality control, supply chain tracking, and automated manufacturing (IIoT).</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Transportation -->
+                <div class="reveal stagger-5 group">
+                    <div class="glass-card rounded-2xl overflow-hidden h-full">
+                        <div class="h-44 relative overflow-hidden">
+                            <img src="https://picsum.photos/seed/transport-iot/600/350.jpg" alt="Transportation" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+                            <div class="absolute inset-0 bg-gradient-to-t from-dark-900 via-dark-900/50 to-transparent"></div>
+                            <div class="absolute bottom-4 left-4">
+                                <div class="w-10 h-10 rounded-xl bg-cyan-500/20 backdrop-blur-sm border border-cyan-500/30 flex items-center justify-center">
+                                    <i data-lucide="car" class="w-5 h-5 text-cyan-400"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-lg font-medium text-white mb-2">Transportation</h3>
+                            <p class="text-sm text-white/50 leading-relaxed">Connected vehicles, fleet management, traffic monitoring, and autonomous driving systems.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Smart Cities -->
+                <div class="reveal stagger-6 group">
+                    <div class="glass-card rounded-2xl overflow-hidden h-full">
+                        <div class="h-44 relative overflow-hidden">
+                            <img src="https://picsum.photos/seed/smartcity-iot/600/350.jpg" alt="Smart Cities" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+                            <div class="absolute inset-0 bg-gradient-to-t from-dark-900 via-dark-900/50 to-transparent"></div>
+                            <div class="absolute bottom-4 left-4">
+                                <div class="w-10 h-10 rounded-xl bg-indigo-500/20 backdrop-blur-sm border border-indigo-500/30 flex items-center justify-center">
+                                    <i data-lucide="building-2" class="w-5 h-5 text-indigo-400"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-lg font-medium text-white mb-2">Smart Cities</h3>
+                            <p class="text-sm text-white/50 leading-relaxed">Smart streetlights, waste management, water supply monitoring, and intelligent parking systems.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- ===== SECTION 7: ADVANTAGES OF IOT ===== -->
+    <section id="advantages" class="relative py-24 sm:py-32 overflow-hidden">
+        <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-accent/[0.02] rounded-full blur-[120px]"></div>
+        <div class="max-w-7xl mx-auto px-6 relative z-10">
+            <div class="text-center mb-16 reveal">
+                <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-500/10 border border-green-500/20 text-[10px] font-semibold uppercase tracking-widest text-green-400 mb-6">
+                    <i data-lucide="thumbs-up" class="w-3 h-3"></i>
+                    Benefits
+                </span>
+                <h2 class="text-4xl sm:text-5xl lg:text-6xl font-light tracking-tighter leading-[1.1] mb-6">
+                    Advantages of <span class="text-green-400">IoT</span>
+                </h2>
+                <p class="text-lg text-white/50 font-light max-w-2xl mx-auto">
+                    IoT provides automation, saves time and energy, improves productivity, reduces costs, and allows real-time monitoring and control.
+                </p>
+            </div>
+
+            <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="reveal stagger-1 glass-card rounded-2xl p-8 group">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="w-12 h-12 rounded-xl bg-green-500/10 border border-green-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <i data-lucide="bot" class="w-5 h-5 text-green-400"></i>
+                        </div>
+                        <h3 class="text-lg font-medium text-white">Automation</h3>
+                    </div>
+                    <p class="text-sm text-white/50 leading-relaxed">Devices can operate automatically without human intervention, reducing manual effort significantly.</p>
+                </div>
+
+                <div class="reveal stagger-2 glass-card rounded-2xl p-8 group">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="w-12 h-12 rounded-xl bg-green-500/10 border border-green-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <i data-lucide="clock" class="w-5 h-5 text-green-400"></i>
+                        </div>
+                        <h3 class="text-lg font-medium text-white">Saves Time & Energy</h3>
+                    </div>
+                    <p class="text-sm text-white/50 leading-relaxed">Automated processes complete tasks faster and optimize energy consumption in smart systems.</p>
+                </div>
+
+                <div class="reveal stagger-3 glass-card rounded-2xl p-8 group">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="w-12 h-12 rounded-xl bg-green-500/10 border border-green-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <i data-lucide="trending-up" class="w-5 h-5 text-green-400"></i>
+                        </div>
+                        <h3 class="text-lg font-medium text-white">Improves Productivity</h3>
+                    </div>
+                    <p class="text-sm text-white/50 leading-relaxed">Businesses can monitor and optimize operations in real-time, leading to higher output and efficiency.</p>
+                </div>
+
+                <div class="reveal stagger-4 glass-card rounded-2xl p-8 group">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="w-12 h-12 rounded-xl bg-green-500/10 border border-green-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <i data-lucide="piggy-bank" class="w-5 h-5 text-green-400"></i>
+                        </div>
+                        <h3 class="text-lg font-medium text-white">Reduces Costs</h3>
+                    </div>
+                    <p class="text-sm text-white/50 leading-relaxed">Predictive maintenance and optimized resource usage significantly lower operational expenses.</p>
+                </div>
+
+                <div class="reveal stagger-5 glass-card rounded-2xl p-8 group">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="w-12 h-12 rounded-xl bg-green-500/10 border border-green-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <i data-lucide="eye" class="w-5 h-5 text-green-400"></i>
+                        </div>
+                        <h3 class="text-lg font-medium text-white">Real-time Monitoring</h3>
+                    </div>
+                    <p class="text-sm text-white/50 leading-relaxed">Users can monitor and control devices from anywhere in the world through smartphone apps and dashboards.</p>
+                </div>
+
+                <div class="reveal stagger-6 glass-card rounded-2xl p-8 group">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="w-12 h-12 rounded-xl bg-green-500/10 border border-green-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <i data-lucide="shield-check" class="w-5 h-5 text-green-400"></i>
+                        </div>
+                        <h3 class="text-lg font-medium text-white">Better Decision Making</h3>
+                    </div>
+                    <p class="text-sm text-white/50 leading-relaxed">Data-driven insights from IoT devices enable more informed and accurate decision-making processes.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- ===== SECTION 8: DISADVANTAGES OF IOT ===== -->
+    <section id="disadvantages" class="relative py-24 sm:py-32 overflow-hidden">
+        <div class="absolute top-0 left-0 w-[500px] h-[500px] bg-red-500/[0.02] rounded-full blur-[120px]"></div>
+        <div class="max-w-7xl mx-auto px-6 relative z-10">
+            <div class="text-center mb-16 reveal">
+                <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-500/10 border border-red-500/20 text-[10px] font-semibold uppercase tracking-widest text-red-400 mb-6">
+                    <i data-lucide="alert-triangle" class="w-3 h-3"></i>
+                    Challenges
+                </span>
+                <h2 class="text-4xl sm:text-5xl lg:text-6xl font-light tracking-tighter leading-[1.1] mb-6">
+                    Disadvantages of <span class="text-red-400">IoT</span>
+                </h2>
+                <p class="text-lg text-white/50 font-light max-w-2xl mx-auto">
+                    IoT faces challenges such as security risks, privacy concerns, internet dependency, and high installation and maintenance costs.
+                </p>
+            </div>
+
+            <div class="grid sm:grid-cols-2 gap-6 max-w-4xl mx-auto">
+                <div class="reveal stagger-1 glass-card rounded-2xl p-8 border-l-2 border-l-red-500/50 group">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="w-12 h-12 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <i data-lucide="shield-alert" class="w-5 h-5 text-red-400"></i>
+                        </div>
+                        <h3 class="text-lg font-medium text-white">Security Risks</h3>
+                    </div>
+                    <p class="text-sm text-white/50 leading-relaxed">Connected devices are vulnerable to hacking, malware attacks, and unauthorized access, putting user data at risk.</p>
+                </div>
+
+                <div class="reveal stagger-2 glass-card rounded-2xl p-8 border-l-2 border-l-red-500/50 group">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="w-12 h-12 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <i data-lucide="eye-off" class="w-5 h-5 text-red-400"></i>
+                        </div>
+                        <h3 class="text-lg font-medium text-white">Privacy Concerns</h3>
+                    </div>
+                    <p class="text-sm text-white/50 leading-relaxed">Massive data collection raises serious privacy issues. Personal information can be misused or exposed without consent.</p>
+                </div>
+
+                <div class="reveal stagger-3 glass-card rounded-2xl p-8 border-l-2 border-l-red-500/50 group">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="w-12 h-12 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <i data-lucide="wifi-off" class="w-5 h-5 text-red-400"></i>
+                        </div>
+                        <h3 class="text-lg font-medium text-white">Internet Dependency</h3>
+                    </div>
+                    <p class="text-sm text-white/50 leading-relaxed">IoT devices completely rely on internet connectivity. Without it, the entire system becomes non-functional.</p>
+                </div>
+
+                <div class="reveal stagger-4 glass-card rounded-2xl p-8 border-l-2 border-l-red-500/50 group">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="w-12 h-12 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <i data-lucide="indian-rupee" class="w-5 h-5 text-red-400"></i>
+                        </div>
+                        <h3 class="text-lg font-medium text-white">High Costs</h3>
+                    </div>
+                    <p class="text-sm text-white/50 leading-relaxed">Installation, maintenance, and upgrading IoT systems require significant financial investment, especially at scale.</p>
+                </div>
+            </div>
+
+            <!-- Comparison -->
+            <div class="mt-16 reveal">
+                <div class="glass-card rounded-2xl p-8 sm:p-10">
+                    <p class="text-xs uppercase tracking-widest text-white/40 mb-8 text-center">Advantages vs Disadvantages</p>
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div>
+                            <div class="flex items-center gap-2 mb-4">
+                                <i data-lucide="check-circle" class="w-4 h-4 text-green-400"></i>
+                                <span class="text-sm font-medium text-green-400">Pros</span>
+                            </div>
+                            <div class="space-y-3">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-1.5 h-1.5 rounded-full bg-green-400"></div>
+                                    <span class="text-sm text-white/60">Automation & efficiency</span>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-1.5 h-1.5 rounded-full bg-green-400"></div>
+                                    <span class="text-sm text-white/60">Cost reduction over time</span>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-1.5 h-1.5 rounded-full bg-green-400"></div>
+                                    <span class="text-sm text-white/60">Real-time control</span>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-1.5 h-1.5 rounded-full bg-green-400"></div>
+                                    <span class="text-sm text-white/60">Better customer experience</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2 mb-4">
+                                <i data-lucide="x-circle" class="w-4 h-4 text-red-400"></i>
+                                <span class="text-sm font-medium text-red-400">Cons</span>
+                            </div>
+                            <div class="space-y-3">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-1.5 h-1.5 rounded-full bg-red-400"></div>
+                                    <span class="text-sm text-white/60">Security vulnerabilities</span>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-1.5 h-1.5 rounded-full bg-red-400"></div>
+                                    <span class="text-sm text-white/60">Privacy & data risks</span>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-1.5 h-1.5 rounded-full bg-red-400"></div>
+                                    <span class="text-sm text-white/60">Requires internet 24/7</span>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-1.5 h-1.5 rounded-full bg-red-400"></div>
+                                    <span class="text-sm text-white/60">High initial setup cost</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- ===== SECTION 9: FUTURE SCOPE ===== -->
+    <section id="future" class="relative py-24 sm:py-32 overflow-hidden">
+        <div class="absolute top-1/2 right-0 w-[500px] h-[500px] bg-accent/[0.03] rounded-full blur-[120px]"></div>
+        <div class="max-w-7xl mx-auto px-6 relative z-10">
+            <div class="text-center mb-16 reveal">
+                <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/10 border border-accent/20 text-[10px] font-semibold uppercase tracking-widest text-accent mb-6">
+                    <i data-lucide="rocket" class="w-3 h-3"></i>
+                    Tomorrow
+                </span>
+                <h2 class="text-4xl sm:text-5xl lg:text-6xl font-light tracking-tighter leading-[1.1] mb-6">
+                    Future Scope of <span class="text-accent">IoT</span>
+                </h2>
+                <p class="text-lg text-white/50 font-light max-w-2xl mx-auto">
+                    The future includes smart cities, smart healthcare, intelligent transportation, AI integration, and advanced automation in every sector.
+                </p>
+            </div>
+
+            <!-- Timeline -->
+            <div class="relative max-w-4xl mx-auto">
+                <!-- Vertical Line -->
+                <div class="absolute left-6 md:left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-accent/30 via-accent/10 to-transparent md:-translate-x-px"></div>
+
+                <!-- Item 1 -->
+                <div class="reveal stagger-1 relative flex flex-col md:flex-row items-start mb-12 md:mb-16">
+                    <div class="md:w-1/2 md:pr-12 md:text-right pl-16 md:pl-0">
+                        <span class="text-xs text-accent/60 font-medium uppercase tracking-wider">Near Future</span>
+                        <h3 class="text-xl font-medium text-white mt-2 mb-2">Smart Cities 2.0</h3>
+                        <p class="text-sm text-white/50 leading-relaxed">Fully integrated urban infrastructure with AI-managed traffic, energy grids, waste systems, and public services operating in harmony.</p>
+                    </div>
+                    <div class="absolute left-3.5 md:left-1/2 md:-translate-x-1/2 w-5 h-5 rounded-full bg-dark-900 border-2 border-accent flex items-center justify-center mt-1">
+                        <div class="w-2 h-2 rounded-full bg-accent"></div>
+                    </div>
+                    <div class="md:w-1/2 md:pl-12 hidden md:block"></div>
+                </div>
+
+                <!-- Item 2 -->
+                <div class="reveal stagger-2 relative flex flex-col md:flex-row items-start mb-12 md:mb-16">
+                    <div class="md:w-1/2 md:pr-12 hidden md:block"></div>
+                    <div class="absolute left-3.5 md:left-1/2 md:-translate-x-1/2 w-5 h-5 rounded-full bg-dark-900 border-2 border-blue-400 flex items-center justify-center mt-1">
+                        <div class="w-2 h-2 rounded-full bg-blue-400"></div>
+                    </div>
+                    <div class="md:w-1/2 md:pl-12 pl-16">
+                        <span class="text-xs text-blue-400/60 font-medium uppercase tracking-wider">Emerging</span>
+                        <h3 class="text-xl font-medium text-white mt-2 mb-2">Smart Healthcare</h3>
+                        <p class="text-sm text-white/50 leading-relaxed">AI-powered diagnostics, remote surgery, nano-sensors in the body, and personalized medicine driven by continuous health data.</p>
+                    </div>
+                </div>
+
+                <!-- Item 3 -->
+                <div class="reveal stagger-3 relative flex flex-col md:flex-row items-start mb-12 md:mb-16">
+                    <div class="md:w-1/2 md:pr-12 md:text-right pl-16 md:pl-0">
+                        <span class="text-xs text-purple-400/60 font-medium uppercase tracking-wider">Advancing</span>
+                        <h3 class="text-xl font-medium text-white mt-2 mb-2">Intelligent Transportation</h3>
+                        <p class="text-sm text-white/50 leading-relaxed">Fully autonomous vehicles, connected traffic ecosystems, drone deliveries, and smart logistics revolutionizing movement of goods and people.</p>
+                    </div>
+                    <div class="absolute left-3.5 md:left-1/2 md:-translate-x-1/2 w-5 h-5 rounded-full bg-dark-900 border-2 border-purple-400 flex items-center justify-center mt-1">
+                        <div class="w-2 h-2 rounded-full bg-purple-400"></div>
+                    </div>
+                    <div class="md:w-1/2 md:pl-12 hidden md:block"></div>
+                </div>
+
+                <!-- Item 4 -->
+                <div class="reveal stagger-4 relative flex flex-col md:flex-row items-start mb-12 md:mb-16">
+                    <div class="md:w-1/2 md:pr-12 hidden md:block"></div>
+                    <div class="absolute left-3.5 md:left-1/2 md:-translate-x-1/2 w-5 h-5 rounded-full bg-dark-900 border-2 border-orange-400 flex items-center justify-center mt-1">
+                        <div class="w-2 h-2 rounded-full bg-orange-400"></div>
+                    </div>
+                    <div class="md:w-1/2 md:pl-12 pl-16">
+                        <span class="text-xs text-orange-400/60 font-medium uppercase tracking-wider">Transformative</span>
+                        <h3 class="text-xl font-medium text-white mt-2 mb-2">AI + IoT Integration</h3>
+                        <p class="text-sm text-white/50 leading-relaxed">Edge AI, self-learning systems, and cognitive IoT creating devices that not only collect data but understand, reason, and evolve.</p>
+                    </div>
+                </div>
+
+                <!-- Item 5 -->
+                <div class="reveal stagger-5 relative flex flex-col md:flex-row items-start">
+                    <div class="md:w-1/2 md:pr-12 md:text-right pl-16 md:pl-0">
+                        <span class="text-xs text-cyan-400/60 font-medium uppercase tracking-wider">Long-term Vision</span>
+                        <h3 class="text-xl font-medium text-white mt-2 mb-2">Universal Automation</h3>
+                        <p class="text-sm text-white/50 leading-relaxed">Every sector — education, governance, retail, energy — fully automated with IoT, creating a seamlessly connected world.</p>
+                    </div>
+                    <div class="absolute left-3.5 md:left-1/2 md:-translate-x-1/2 w-5 h-5 rounded-full bg-dark-900 border-2 border-cyan-400 flex items-center justify-center mt-1">
+                        <div class="w-2 h-2 rounded-full bg-cyan-400"></div>
+                    </div>
+                    <div class="md:w-1/2 md:pl-12 hidden md:block"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- ===== SECTION 10: CONCLUSION ===== -->
+    <section id="conclusion" class="relative py-24 sm:py-32 overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-b from-transparent via-accent/[0.02] to-transparent"></div>
+        <div class="max-w-4xl mx-auto px-6 relative z-10 text-center">
+            <div class="reveal">
+                <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/10 border border-accent/20 text-[10px] font-semibold uppercase tracking-widest text-accent mb-8">
+                    <i data-lucide="flag" class="w-3 h-3"></i>
+                    Conclusion
+                </span>
+            </div>
+
+            <h2 class="reveal text-4xl sm:text-5xl lg:text-6xl font-light tracking-tighter leading-[1.1] mb-8">
+                Transforming the<br><span class="gradient-text">Connected World</span>
+            </h2>
+
+            <div class="reveal glass-card rounded-2xl p-8 sm:p-12 mb-12">
+                <div class="flex items-center justify-center mb-6">
+                    <div class="w-16 h-16 rounded-2xl bg-accent/10 border border-accent/20 flex items-center justify-center animate-pulse-glow">
+                        <i data-lucide="lightbulb" class="w-8 h-8 text-accent"></i>
+                    </div>
+                </div>
+                <p class="text-lg sm:text-xl text-white/80 font-light leading-relaxed max-w-2xl mx-auto mb-6">
+                    IoT is transforming the way people <span class="text-white font-medium">live</span> and <span class="text-white font-medium">work</span> by making devices smarter, improving communication, and increasing efficiency in daily life.
+                </p>
+                <p class="text-base text-white/50 font-light leading-relaxed max-w-2xl mx-auto">
+                    From smart homes to smart cities, from healthcare to agriculture, IoT is bridging the gap between the physical and digital worlds. As technology evolves with AI integration and 5G, the possibilities are limitless. The Internet of Thinking (IoTk) will take this further — creating systems that don't just connect, but truly <span class="text-accent">understand</span>.
+                </p>
+            </div>
+
+            <!-- Key Takeaways -->
+            <div class="reveal grid grid-cols-2 md:grid-cols-4 gap-4 mb-16">
+                <div class="p-4 rounded-xl bg-white/[0.03] border border-white/5">
+                    <i data-lucide="check" class="w-5 h-5 text-accent mx-auto mb-2"></i>
+                    <p class="text-xs text-white/60">IoT connects devices to the internet</p>
+                </div>
+                <div class="p-4 rounded-xl bg-white/[0.03] border border-white/5">
+                    <i data-lucide="check" class="w-5 h-5 text-accent mx-auto mb-2"></i>
+                    <p class="text-xs text-white/60">4 core components work together</p>
+                </div>
+                <div class="p-4 rounded-xl bg-white/[0.03] border border-white/5">
+                    <i data-lucide="check" class="w-5 h-5 text-accent mx-auto mb-2"></i>
+                    <p class="text-xs text-white/60">Used across every major industry</p>
+                </div>
+                <div class="p-4 rounded-xl bg-white/[0.03] border border-white/5">
+                    <i data-lucide="check" class="w-5 h-5 text-accent mx-auto mb-2"></i>
+                    <p class="text-xs text-white/60">Future is AI-powered IoTk</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- ===== SECTION 11: THANK YOU ===== -->
+    <section id="thankyou" class="relative py-32 sm:py-40 overflow-hidden">
+        <div class="absolute inset-0">
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-accent/[0.03] rounded-full blur-[150px]"></div>
+        </div>
+
+        <div class="relative z-10 text-center px-6 max-w-3xl mx-auto">
+            <div class="reveal-scale">
+                <!-- Animated Icon -->
+                <div class="w-24 h-24 rounded-3xl bg-accent/10 border border-accent/20 flex items-center justify-center mx-auto mb-10 animate-pulse-glow animate-float">
+                    <i data-lucide="heart" class="w-12 h-12 text-accent"></i>
+                </div>
+
+                <h2 class="text-5xl sm:text-6xl lg:text-7xl font-light tracking-tighter leading-[1.05] mb-6">
+                    Thank <span class="gradient-text">You</span>!
+                </h2>
+
+                <p class="text-xl text-white/60 font-light mb-10">
+                    Any Questions?
+                </p>
+
+                <!-- Author Card -->
+                <div class="glass-card rounded-2xl p-8 max-w-md mx-auto">
+                    <div class="w-20 h-20 rounded-full bg-gradient-to-br from-accent/20 to-accent/5 border-2 border-accent/20 flex items-center justify-center mx-auto mb-4">
+                        <span class="text-2xl font-light text-accent">JK</span>
+                    </div>
+                    <h3 class="text-xl font-medium text-white mb-1">Jaspreet Kaur</h3>
+                    <p class="text-sm text-white/40 mb-6">IoT Project Presentation</p>
+                    <div class="flex items-center justify-center gap-4">
+                        <a href="#hero" class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:border-accent/30 hover:bg-accent/10 transition-all tooltip-custom" data-tooltip="Back to Top">
+                            <i data-lucide="arrow-up" class="w-4 h-4 text-white/60"></i>
+                        </a>
+                        <button onclick="sharePresentation()" class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:border-accent/30 hover:bg-accent/10 transition-all tooltip-custom" data-tooltip="Share">
+                            <i data-lucide="share-2" class="w-4 h-4 text-white/60"></i>
+                        </button>
+                        <button onclick="printPresentation()" class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:border-accent/30 hover:bg-accent/10 transition-all tooltip-custom" data-tooltip="Print">
+                            <i data-lucide="printer" class="w-4 h-4 text-white/60"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-white/5 py-8">
+        <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p class="text-xs text-white/30">© 2025 Jaspreet Kaur • IoT Portfolio Presentation</p>
+            <div class="flex items-center gap-1 text-xs text-white/30">
+                Made with <i data-lucide="heart" class="w-3 h-3 text-accent/50 mx-1"></i> for IoT
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-4 opacity-0 pointer-events-none transition-all duration-300">
+        <div class="glass-card rounded-xl px-5 py-3 flex items-center gap-3 border border-accent/20">
+            <i data-lucide="check-circle" class="w-4 h-4 text-accent"></i>
+            <span id="toastMessage" class="text-sm text-white/80"></span>
+        </div>
+    </div>
+
+    <!-- Back to Top Button -->
+    <button id="backToTop" class="fixed bottom-6 left-6 z-50 w-11 h-11 rounded-xl bg-white/5 border border-white/10 backdrop-blur-xl flex items-center justify-center opacity-0 pointer-events-none transition-all duration-300 hover:border-accent/30 hover:bg-accent/10">
+        <i data-lucide="chevron-up" class="w-5 h-5 text-white/60"></i>
+    </button>
+
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // ===== PARTICLES CANVAS =====
+        const canvas = document.getElementById('particles-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let mouse = { x: 0, y: 0 };
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 1.5 + 0.5;
+                this.speedX = (Math.random() - 0.5) * 0.3;
+                this.speedY = (Math.random() - 0.5) * 0.3;
+                this.opacity = Math.random() * 0.3 + 0.1;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) {
+                    this.reset();
+                }
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(198, 249, 31, ${this.opacity})`;
+                ctx.fill();
+            }
+        }
+
+        for (let i = 0; i < 50; i++) {
+            particles.push(new Particle());
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            // Draw connections
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < 150) {
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.strokeStyle = `rgba(198, 249, 31, ${0.03 * (1 - dist / 150)})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.stroke();
+                    }
+                }
+            }
+            requestAnimationFrame(animateParticles);
+        }
+        animateParticles();
+
+        // ===== CURSOR GLOW =====
+        const cursorGlow = document.getElementById('cursorGlow');
+        document.addEventListener('mousemove', (e) => {
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+            cursorGlow.style.left = e.clientX + 'px';
+            cursorGlow.style.top = e.clientY + 'px';
+        });
+
+        // ===== SCROLL REVEAL =====
+        const revealElements = document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale');
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                }
+            });
+        }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+        revealElements.forEach(el => revealObserver.observe(el));
+
+        // ===== PROGRESS BAR =====
+        const progressBar = document.getElementById('progressBar');
+        window.addEventListener('scroll', () => {
+            const scrollTop = window.scrollY;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const progress = (scrollTop / docHeight) * 100;
+            progressBar.style.width = progress + '%';
+        });
+
+        // ===== BACK TO TOP =====
+        const backToTop = document.getElementById('backToTop');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 500) {
+                backToTop.style.opacity = '1';
+                backToTop.style.pointerEvents = 'auto';
+            } else {
+                backToTop.style.opacity = '0';
+                backToTop.style.pointerEvents = 'none';
+            }
+        });
+        backToTop.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // ===== MOBILE MENU =====
+        const menuBtn = document.getElementById('menuBtn');
+        const closeMenuBtn = document.getElementById('closeMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const menuOverlay = document.getElementById('menuOverlay');
+        const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+
+        function openMenu() {
+            mobileMenu.classList.add('open');
+            menuOverlay.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeMenu() {
+            mobileMenu.classList.remove('open');
+            menuOverlay.classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        menuBtn.addEventListener('click', openMenu);
+        closeMenuBtn.addEventListener('click', closeMenu);
+        menuOverlay.addEventListener('click', closeMenu);
+        mobileNavLinks.forEach(link => link.addEventListener('click', closeMenu));
+
+        // ===== ACTIVE NAV LINK =====
+        const sections = document.querySelectorAll('section[id]');
+        const navLinks = document.querySelectorAll('.nav-link');
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop - 150;
+                if (window.scrollY >= sectionTop) {
+                    current = section.getAttribute('id');
+                }
+            });
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + current) {
+                    link.classList.add('active');
+                }
+            });
+        });
+
+        // ===== NUMBER COUNTER ANIMATION =====
+        const statNumbers = document.querySelectorAll('.stat-number[data-count]');
+        const counterObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const el = entry.target;
+                    const target = parseInt(el.getAttribute('data-count'));
+                    let current = 0;
+                    const increment = target / 60;
+                    const timer = setInterval(() => {
+                        current += increment;
+                        if (current >= target) {
+                            current = target;
+                            clearInterval(timer);
+                        }
+                        el.textContent = Math.round(current).toLocaleString() + (target > 100 ? '' : 'B+');
+                        if (target === 1100) el.textContent = '$' + Math.round(current) + 'B';
+                        if (target === 30) el.textContent = Math.round(current) + 'B+';
+                        if (target === 94) el.textContent = Math.round(current) + '%';
+                        if (target === 75) el.textContent = Math.round(current) + 'B+';
+                    }, 30);
+                    counterObserver.unobserve(el);
+                }
+            });
+        }, { threshold: 0.5 });
+
+        statNumbers.forEach(el => counterObserver.observe(el));
+
+        // ===== TOAST NOTIFICATION =====
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            toastMessage.textContent = message;
+            toast.style.transform = 'translateY(0)';
+            toast.style.opacity = '1';
+            toast.style.pointerEvents = 'auto';
+            setTimeout(() => {
+                toast.style.transform = 'translateY(4px)';
+                toast.style.opacity = '0';
+                toast.style.pointerEvents = 'none';
+            }, 3000);
+        }
+
+        // ===== SHARE & PRINT =====
+        function sharePresentation() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Internet of Things - Jaspreet Kaur',
+                    text: 'Check out my IoT presentation!',
+                    url: window.location.href
+                });
+            } else {
+                navigator.clipboard.writeText(window.location.href).then(() => {
+                    showToast('Link copied to clipboard!');
+                });
+            }
+        }
+
+        function printPresentation() {
+            window.print();
+            showToast('Preparing print view...');
+        }
+
+        // ===== NAVBAR HIDE/SHOW ON SCROLL =====
+        let lastScrollY = 0;
+        const navbar = document.getElementById('navbar');
+
+        window.addEventListener('scroll', () => {
+            const currentScrollY = window.scrollY;
+            if (currentScrollY > lastScrollY && currentScrollY > 100) {
+                navbar.style.transform = 'translateY(-100%)';
+                navbar.style.transition = 'transform 0.3s ease';
+            } else {
+                navbar.style.transform = 'translateY(0)';
+            }
+            lastScrollY = currentScrollY;
+        });
+    </script>
+</body>
+</html>
